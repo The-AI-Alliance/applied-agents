@@ -132,7 +132,7 @@ class DatabaseStack(aws_cdk.Stack):
         python_runtime_version = "python3.12"
         src_home = "../src/lambda_loader"
         src_root = "../src"
-        command = f"../scripts/build_lambda.sh {temp_build_root} {python_runtime_version.replace("python","")} {application_ci} {src_home} {src_root}"
+        command = f"../scripts/build_lambda.sh {temp_build_root} {python_runtime_version.replace('python','')} {application_ci} {src_home} {src_root}"
         try:
             process = subprocess.Popen(
                 command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
