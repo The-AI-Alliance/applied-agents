@@ -53,7 +53,7 @@ class DatabaseStack(aws_cdk.Stack):
                 generate_string_key="password",
             ),
         )
-
+        self.database_cluster_secret_arn = secret_db_creds.secret_arn
         serverless_security_group = ec2.SecurityGroup(
             self,
             "serverless-sg",
@@ -104,7 +104,7 @@ class DatabaseStack(aws_cdk.Stack):
             ec2.Port.tcp(5432),
             "Allow lambda connectivity to rds Postgres database",
         )
-
+        self.database_name = "default_db"
         database = rds.DatabaseCluster(
             self,
             "rds_database",
@@ -123,10 +123,10 @@ class DatabaseStack(aws_cdk.Stack):
                 subnet_type=ec2.SubnetType.PUBLIC  # Private with Egress?
             ),
             vpc=vpc,
-            default_database_name="default_db",
+            default_database_name=self.database_name,
             security_groups=[rds_security_group],
         )
-
+        self.database_cluster_arn = database.cluster_arn
         # TODO: handle this better
         temp_build_root = "/tmp/build"
         python_runtime_version = "python3.12"
@@ -161,6 +161,7 @@ class DatabaseStack(aws_cdk.Stack):
                 "DATA_BUCKET": data_bucket.bucket_name,
                 "AURORA_SECRET_NAME": secret_db_creds.secret_name,
                 "DATA_FILE": "chinook.sql",
+                "VECTOR_CONFIG_FILE": "vector.sql",
             },
             vpc=vpc,
             vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),

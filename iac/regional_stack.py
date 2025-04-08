@@ -5,6 +5,7 @@ import aws_cdk
 
 from database_stack.database_stack import DatabaseStack
 from data_stack.data_stack import DataStack
+from knowledge_base_stack.knowledge_base_stack import KnowledgeBaseStack
 
 
 class RegionalStack(aws_cdk.Stack):
@@ -30,4 +31,15 @@ class RegionalStack(aws_cdk.Stack):
             env=env,
             data_bucket=data_stack.data_bucket,
             application_ci=application_ci,
+        )
+
+        # Stack 3 - knowledge base stack
+        knowledge_base_stack = KnowledgeBaseStack(
+            self,
+            "knowledge_base",
+            env=env,
+            application_ci=application_ci,
+            database_cluster_secret_arn=database_stack.database_cluster_secret_arn,
+            database_cluster_arn=database_stack.database_cluster_arn,
+            database_name=database_stack.database_name,
         )
