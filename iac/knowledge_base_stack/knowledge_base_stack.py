@@ -26,7 +26,7 @@ class KnowledgeBaseStack(aws_cdk.Stack):
             assumed_by=iam.ServicePrincipal("bedrock.amazonaws.com"),
         )
 
-        account_id = 843382705282
+        account_id = env.account
         region_name = "us-east-1"
         bedrock_kb_role.assume_role_policy.add_statements(
             iam.PolicyStatement(
