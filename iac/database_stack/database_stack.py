@@ -4,7 +4,6 @@ import subprocess
 import sys
 import shutil
 import os
-import random
 from aws_cdk import (
     aws_iam as iam,
     aws_rds as rds,
@@ -40,14 +39,13 @@ class DatabaseStack(aws_cdk.Stack):
             region=env.region,
             is_default=True,
         )
-        r = random.randint(0, 10000)
         secret_db_creds = secretsmanager.Secret(
             self,
             "rds_creds",
             secret_name=f"{application_ci}/db_creds",
             generate_secret_string=secretsmanager.SecretStringGenerator(
                 secret_string_template=json.dumps(
-                    {"username": f"{application_ci}admin{r}"}
+                    {"username": f"{application_ci}admin"}
                 ),
                 exclude_punctuation=True,
                 generate_string_key="password",
@@ -125,6 +123,7 @@ class DatabaseStack(aws_cdk.Stack):
             vpc=vpc,
             default_database_name=self.database_name,
             security_groups=[rds_security_group],
+            enable_data_api=True,
         )
         self.database_cluster_arn = database.cluster_arn
         # TODO: handle this better

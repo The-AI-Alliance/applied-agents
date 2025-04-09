@@ -42,4 +42,6 @@ class RegionalStack(aws_cdk.Stack):
             database_cluster_secret_arn=database_stack.database_cluster_secret_arn,
             database_cluster_arn=database_stack.database_cluster_arn,
             database_name=database_stack.database_name,
+            bucket_arn=data_stack.data_bucket.bucket_arn,
+            bucket_name=data_stack.data_bucket.bucket_name,
         )

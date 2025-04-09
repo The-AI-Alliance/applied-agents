@@ -20,3 +20,4 @@ GRANT ALL ON TABLE aws_managed.kb to bedrock_user;
 --Step 5 : Create the Index
 
 CREATE INDEX on aws_managed.kb USING hnsw (embedding vector_cosine_ops);
+CREATE INDEX on aws_managed.kb USING gin (to_tsvector('simple', chunks));
