@@ -39,6 +39,7 @@ class DatabaseStack(aws_cdk.Stack):
             region=env.region,
             is_default=True,
         )
+        self.vpc_arn = vpc.vpc_arn
         secret_db_creds = secretsmanager.Secret(
             self,
             "rds_creds",

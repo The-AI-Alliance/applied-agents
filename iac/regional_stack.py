@@ -13,7 +13,6 @@ class RegionalStack(aws_cdk.Stack):
         self,
         scope,
         application_ci: builtins.str,
-        runtime_environment: str,
         env: aws_cdk.Environment,
         id: builtins.str,
         **kwargs

@@ -24,8 +24,10 @@ class KnowledgeBaseStack(aws_cdk.Stack):
     ) -> None:
 
         super().__init__(scope, construct_id, env=env, **kwargs)
+
         account_id = env.account
-        region_name = "us-east-1"
+        region_name = env.region
+
         embeddingModelArn = f"arn:aws:bedrock:{region_name}::foundation-model/amazon.titan-embed-text-v1"
 
         bedrock_kb_role = iam.Role(
@@ -119,6 +121,8 @@ class KnowledgeBaseStack(aws_cdk.Stack):
             ),
             storage_configuration=storage_configuration,
         )
+        self.knowledge_base_id = knowledge_base.attr_knowledge_base_id
+        self.knowledge_base_arn = knowledge_base.attr_knowledge_base_arn
 
         data_source = bedrock.CfnDataSource(
             self,
