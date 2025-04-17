@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "analytics-agent"
+name = "applied-agents"
 version = "0.0.1"
 description = "AWS CDK infrastructure project for an analytics agent"
 authors = ["Agent Team <agentteam@ai_alliance.com>"]

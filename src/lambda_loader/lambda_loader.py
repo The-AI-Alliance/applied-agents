@@ -17,10 +17,18 @@ def handler(event, context):
     value = json.loads(parameters.get_secret(secret_name))
     logger.info("Getting data to load...")
     s3 = boto3.client("s3")
-    data = s3.get_object(
+    analytic_data = s3.get_object(
         Bucket=os.environ.get("DATA_BUCKET"), Key=os.environ.get("DATA_FILE")
     )
-    contents = data["Body"].read()
+    vector_schema = s3.get_object(
+        Bucket=os.environ.get("DATA_BUCKET"), Key=os.environ.get("VECTOR_CONFIG_FILE")
+    )
+
+    analytics_contents = analytic_data["Body"].read()
+    vector_schema_contents = vector_schema["Body"].read().decode("utf-8")
+    vector_schema_contents_replaced = vector_schema_contents.replace(
+        "<update with secure password>", value["password"]
+    )
     try:
         logger.info("Connecting to database...")
         conn = psycopg2.connect(
@@ -31,8 +39,11 @@ def handler(event, context):
             port=value["port"],
         )
         cur = conn.cursor()
-        logger.info("Loading database...")
-        cur.execute(contents)
+        logger.info("Loading analytic data...")
+        cur.execute(analytics_contents)
+        conn.commit()
+        logger.info("Configuring vector schema...")
+        cur.execute(vector_schema_contents_replaced)
         conn.commit()
         logger.info("Closing connection to database...")
         cur.close()

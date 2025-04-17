@@ -4,7 +4,6 @@ import subprocess
 import sys
 import shutil
 import os
-import random
 from aws_cdk import (
     aws_iam as iam,
     aws_rds as rds,
@@ -40,20 +39,20 @@ class DatabaseStack(aws_cdk.Stack):
             region=env.region,
             is_default=True,
         )
-        r = random.randint(0, 10000)
+        self.vpc_arn = vpc.vpc_arn
         secret_db_creds = secretsmanager.Secret(
             self,
             "rds_creds",
             secret_name=f"{application_ci}/db_creds",
             generate_secret_string=secretsmanager.SecretStringGenerator(
                 secret_string_template=json.dumps(
-                    {"username": f"{application_ci}admin{r}"}
+                    {"username": f"{application_ci}admin"}
                 ),
                 exclude_punctuation=True,
                 generate_string_key="password",
             ),
         )
-
+        self.database_cluster_secret_arn = secret_db_creds.secret_arn
         serverless_security_group = ec2.SecurityGroup(
             self,
             "serverless-sg",
@@ -104,7 +103,7 @@ class DatabaseStack(aws_cdk.Stack):
             ec2.Port.tcp(5432),
             "Allow lambda connectivity to rds Postgres database",
         )
-
+        self.database_name = "default_db"
         database = rds.DatabaseCluster(
             self,
             "rds_database",
@@ -123,10 +122,11 @@ class DatabaseStack(aws_cdk.Stack):
                 subnet_type=ec2.SubnetType.PUBLIC  # Private with Egress?
             ),
             vpc=vpc,
-            default_database_name="default_db",
+            default_database_name=self.database_name,
             security_groups=[rds_security_group],
+            enable_data_api=True,
         )
-
+        self.database_cluster_arn = database.cluster_arn
         # TODO: handle this better
         temp_build_root = "/tmp/build"
         python_runtime_version = "python3.12"
@@ -161,6 +161,7 @@ class DatabaseStack(aws_cdk.Stack):
                 "DATA_BUCKET": data_bucket.bucket_name,
                 "AURORA_SECRET_NAME": secret_db_creds.secret_name,
                 "DATA_FILE": "chinook.sql",
+                "VECTOR_CONFIG_FILE": "vector.sql",
             },
             vpc=vpc,
             vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),
