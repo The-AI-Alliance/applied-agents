@@ -7,6 +7,7 @@ from database_stack.database_stack import DatabaseStack
 from data_stack.data_stack import DataStack
 from knowledge_base_stack.knowledge_base_stack import KnowledgeBaseStack
 from context_stack.context_stack import ContextStack
+from inference_stack.inference_stack import InferenceStack
 
 
 class RegionalStack(aws_cdk.Stack):
@@ -16,7 +17,8 @@ class RegionalStack(aws_cdk.Stack):
         application_ci: builtins.str,
         env: aws_cdk.Environment,
         id: builtins.str,
-        **kwargs
+        runtime_environment: builtins.str,
+        **kwargs,
     ):
 
         super().__init__(scope, id, **kwargs)
@@ -52,4 +54,18 @@ class RegionalStack(aws_cdk.Stack):
             "context_stack",
             env=env,
             application_ci=application_ci,
+        )
+
+        bedrock_model_version = "bedrock-2023-05-31"
+        bedrock_model_id = "anthropic.claude-3-sonnet-20240229-v1:0"
+
+        inference_stack = InferenceStack(
+            self,
+            "inference_stack",
+            env=env,
+            application_ci=application_ci,
+            knowledge_base_id=knowledge_base_stack.knowledge_base_id,
+            bedrock_model_id=bedrock_model_id,
+            bedrock_model_version=bedrock_model_version,
+            knowledge_base_arn=knowledge_base_stack.knowledge_base_arn,
         )
