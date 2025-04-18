@@ -6,6 +6,7 @@ import aws_cdk
 from database_stack.database_stack import DatabaseStack
 from data_stack.data_stack import DataStack
 from knowledge_base_stack.knowledge_base_stack import KnowledgeBaseStack
+from context_stack.context_stack import ContextStack
 
 
 class RegionalStack(aws_cdk.Stack):
@@ -43,4 +44,12 @@ class RegionalStack(aws_cdk.Stack):
             database_name=database_stack.database_name,
             bucket_arn=data_stack.data_bucket.bucket_arn,
             bucket_name=data_stack.data_bucket.bucket_name,
+        )
+
+        # Stack 4 - Context stack. May move this to app side.
+        context_stack = ContextStack(
+            self,
+            "context_stack",
+            env=env,
+            application_ci=application_ci,
         )
