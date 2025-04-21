@@ -9,8 +9,10 @@ from typing import List, Dict, Any
 bedrock_client = boto3.client("bedrock-runtime")
 bedrock_agent_runtime = boto3.client(service_name="bedrock-agent-runtime")
 
-# api_gateway_endpoint_url = os.getenv('API_GATEWAY_ENDPOINT_URL')
-# apigatewaymanagementapi_client = boto3.client('apigatewaymanagementapi', endpoint_url=api_gateway_endpoint_url)
+api_gateway_endpoint_url = os.getenv("API_GATEWAY_ENDPOINT_URL")
+apigatewaymanagementapi_client = boto3.client(
+    "apigatewaymanagementapi", endpoint_url=api_gateway_endpoint_url
+)
 
 
 def vector_db_retrieve(query, kbId, numberOfResults=5):
@@ -43,7 +45,12 @@ def handler(event: List[Dict[str, Any]], context: Any) -> str:
     knowledge_base_id = os.getenv("KNOWLEDGE_BASE_ID")
 
     # Extract historical conversation records for context
-    history = get_history_from_records(event["contentResults"][0]["Items"])
+    history = []
+    try:
+        history = get_history_from_records(event["contentResults"][0]["Items"])
+    except Exception as e:
+        pass
+
     question = event["data"]["message"]
     connection_id = event["ConnectionID"]
 
@@ -88,8 +95,9 @@ def process_response(
         # Check for message completion indicator
         if chunk["type"] == "message_delta":
             # Signal the end of the message to the API Gateway
-            # apigatewaymanagementapi_client.post_to_connection(Data="[[END]]", ConnectionId=connection_id)
-            True
+            apigatewaymanagementapi_client.post_to_connection(
+                Data="[[END]]", ConnectionId=connection_id
+            )
 
         # Check for text content and append it to the full response
         if (
@@ -97,7 +105,9 @@ def process_response(
             and chunk["delta"]["type"] == "text_delta"
         ):
             # Send the text chunk to the API Gateway and accumulate it
-            # apigatewaymanagementapi_client.post_to_connection(Data=chunk['delta']['text'], ConnectionId=connection_id)
+            apigatewaymanagementapi_client.post_to_connection(
+                Data=chunk["delta"]["text"], ConnectionId=connection_id
+            )
             full_response += chunk["delta"]["text"]
     return full_response
 

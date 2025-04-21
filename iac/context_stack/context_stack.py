@@ -30,3 +30,6 @@ class ContextStack(aws_cdk.Stack):
             sort_key=dynamodb.Attribute(name="SK", type=dynamodb.AttributeType.NUMBER),
             # stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,  # is this obsolete?
         )
+
+        self.contexttable_table_name = table.table_name
+        self.contexttable_table_arn = table.table_arn

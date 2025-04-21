@@ -1,0 +1,91 @@
+{
+	"Comment": "Websocket StateMachine",
+	"StartAt": "Fetch history",
+	"States": {
+		"Fetch history": {
+			"Type": "Task",
+			"Parameters": {
+			  "TableName": "${ContextTable}",
+			  "KeyConditionExpression": "PK = :pk",
+			  "ExpressionAttributeValues": {
+				":pk": {
+				  "S.$": "$.ConnectionID"
+				}
+			  }
+			},
+			"Resource": "arn:aws:states:::aws-sdk:dynamodb:query",
+			"Next": "Ask bedrock",
+			"ResultPath": "$.contentResults"
+		  },
+		"Ask bedrock": {
+			"Type": "Task",
+			"Resource": "arn:aws:states:::lambda:invoke",
+			"Parameters": {
+				"Payload.$": "$",
+				"FunctionName": "${PromptFunction}"
+			},
+			"Retry": [
+				{
+					"ErrorEquals": [
+						"Lambda.ServiceException",
+						"Lambda.AWSLambdaException",
+						"Lambda.SdkClientException",
+						"Lambda.TooManyRequestsException"
+					],
+					"IntervalSeconds": 1,
+					"MaxAttempts": 3,
+					"BackoffRate": 2
+				}
+			],
+			"Next": "Update history",
+			"ResultPath": "$.fullResults",
+			"TimeoutSeconds": 60,
+			"Catch": [
+				{
+					"ErrorEquals": [
+						"States.Timeout",
+						"States.TaskFailed"
+					],
+					"Next": "Error: invocation",
+					"Comment": "Warn user of issue",
+					"ResultPath": "$.PromptError"
+				}
+			]
+		},
+		"Error: invocation": {
+			"Type": "Task",
+			"Resource": "arn:aws:states:::apigateway:invoke",
+			"Parameters": {
+				"ApiEndpoint": "${WSApi}",
+				"Method": "POST",
+				"Stage": "${WSApiStage}",
+				"Path.$": "States.Format('/@connections/{}', $.ConnectionID)",
+				"RequestBody": "**There was an error, please try again later.**",
+				"AuthType": "IAM_ROLE"
+			},
+			"End": true
+		},
+		"Update history": {
+			"Type": "Task",
+			"Resource": "arn:aws:states:::dynamodb:putItem",
+			"Parameters": {
+				"TableName": "${ContextTable}",
+				"Item": {
+					"PK": {
+						"S.$": "$.ConnectionID"
+					},
+					"SK": {
+						"N.$": "$.timestamp"
+					},
+					"question": {
+						"S.$": "$.data.message"
+					},
+					"answer": {
+						"S.$": "$.fullResults.Payload"
+					}
+				}
+			},
+			"End": true
+		}
+	}
+}

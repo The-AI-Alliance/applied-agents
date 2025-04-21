@@ -8,6 +8,7 @@ from data_stack.data_stack import DataStack
 from knowledge_base_stack.knowledge_base_stack import KnowledgeBaseStack
 from context_stack.context_stack import ContextStack
 from inference_stack.inference_stack import InferenceStack
+from api_gateway_stack.api_gateway_stack import ApiGatewayStack
 
 
 class RegionalStack(aws_cdk.Stack):
@@ -68,4 +69,18 @@ class RegionalStack(aws_cdk.Stack):
             bedrock_model_id=bedrock_model_id,
             bedrock_model_version=bedrock_model_version,
             knowledge_base_arn=knowledge_base_stack.knowledge_base_arn,
+            contexttable_table_name=context_stack.contexttable_table_name,
+            contexttable_table_arn=context_stack.contexttable_table_arn,
         )
+        """
+        api_gateway_stack = ApiGatewayStack(
+            self,
+            "api_gateway_stack",
+            env=env,
+            application_ci=application_ci,
+            contexttable_table_name=context_stack.contexttable_table_name,
+            contexttable_table_arn=context_stack.contexttable_table_arn,
+            inference_function_name=inference_stack.inference_function_name,
+            inference_function_arn=inference_stack.inference_function_arn,
+        )
+        """
