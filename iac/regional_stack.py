@@ -8,7 +8,8 @@ from data_stack.data_stack import DataStack
 from knowledge_base_stack.knowledge_base_stack import KnowledgeBaseStack
 from context_stack.context_stack import ContextStack
 from inference_stack.inference_stack import InferenceStack
-from api_gateway_stack.api_gateway_stack import ApiGatewayStack
+from analytics_stack.analytics_stack import AnalyticsStack
+from config.bucket_attributes import BucketAttributes
 
 
 class RegionalStack(aws_cdk.Stack):
@@ -72,15 +73,31 @@ class RegionalStack(aws_cdk.Stack):
             contexttable_table_name=context_stack.contexttable_table_name,
             contexttable_table_arn=context_stack.contexttable_table_arn,
         )
-        """
-        api_gateway_stack = ApiGatewayStack(
+
+        bucket_base_name = f"{application_ci}-analytics"
+
+        secondary_bucket = BucketAttributes(
+            bucket_name=f"{bucket_base_name}-us-east-2",
+            region="us-east-2",
+            account=env.account,
+            id="aaa-analytics-secondary",
+        )
+
+        primary_bucket = BucketAttributes(
+            bucket_name=f"{bucket_base_name}-us-east-1",
+            region="us-east-1",
+            account=env.account,
+            id="aaa-analytics-primary",
+        )
+
+        analytics_stack = AnalyticsStack(
             self,
-            "api_gateway_stack",
+            "analytics_stack",
             env=env,
             application_ci=application_ci,
-            contexttable_table_name=context_stack.contexttable_table_name,
-            contexttable_table_arn=context_stack.contexttable_table_arn,
-            inference_function_name=inference_stack.inference_function_name,
-            inference_function_arn=inference_stack.inference_function_arn,
+            primary_bucket=primary_bucket,
+            secondary_buckets=[secondary_bucket],
+            deploy_replication=False,  # TODO; Get this going
+            termination_protection=False,
+            retain_policy=True,
         )
-        """
