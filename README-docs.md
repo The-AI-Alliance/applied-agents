@@ -1,10 +1,12 @@
-# README for MICROSITE_TITLE
+# README for Applied Agents
 
-[Published Documentation](https://the-ai-alliance.github.io/REPO_NAME/)
+> **NOTE:** This page will apply to the forthcoming website for this repo.
 
-This repo contains the code and documentation for the AI Alliance: MICROSITE_TITLE.
+[Published Documentation](https://the-ai-alliance.github.io/applied-agents/)
 
-See the [repo README](https://the-ai-alliance.github.io/REPO_NAME/) for additional details about this project.
+This repo contains the code and documentation for the AI Alliance: Applied Agents.
+
+See the [repo README](https://the-ai-alliance.github.io/applied-agents/) for additional details about this project.
 
 TODO - Describe this project
 
