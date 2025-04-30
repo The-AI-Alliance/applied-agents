@@ -8,7 +8,6 @@ from data_stack.data_stack import DataStack
 from knowledge_base_stack.knowledge_base_stack import KnowledgeBaseStack
 from context_stack.context_stack import ContextStack
 from inference_stack.inference_stack import InferenceStack
-from analytics_stack.analytics_stack import AnalyticsStack
 from config.bucket_attributes import BucketAttributes
 
 
@@ -88,16 +87,4 @@ class RegionalStack(aws_cdk.Stack):
             region="us-east-1",
             account=env.account,
             id="aaa-analytics-primary",
-        )
-
-        analytics_stack = AnalyticsStack(
-            self,
-            "analytics_stack",
-            env=env,
-            application_ci=application_ci,
-            primary_bucket=primary_bucket,
-            secondary_buckets=[secondary_bucket],
-            deploy_replication=False,  # TODO; Get this going
-            termination_protection=False,
-            retain_policy=True,
         )
