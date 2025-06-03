@@ -6,6 +6,9 @@ import aws_cdk
 from database_stack.database_stack import DatabaseStack
 from data_stack.data_stack import DataStack
 from knowledge_base_stack.knowledge_base_stack import KnowledgeBaseStack
+from context_stack.context_stack import ContextStack
+from inference_stack.inference_stack import InferenceStack
+from config.bucket_attributes import BucketAttributes
 
 
 class RegionalStack(aws_cdk.Stack):
@@ -15,7 +18,8 @@ class RegionalStack(aws_cdk.Stack):
         application_ci: builtins.str,
         env: aws_cdk.Environment,
         id: builtins.str,
-        **kwargs
+        runtime_environment: builtins.str,
+        **kwargs,
     ):
 
         super().__init__(scope, id, **kwargs)
@@ -43,4 +47,44 @@ class RegionalStack(aws_cdk.Stack):
             database_name=database_stack.database_name,
             bucket_arn=data_stack.data_bucket.bucket_arn,
             bucket_name=data_stack.data_bucket.bucket_name,
+        )
+
+        # Stack 4 - Context stack. May move this to app side.
+        context_stack = ContextStack(
+            self,
+            "context_stack",
+            env=env,
+            application_ci=application_ci,
+        )
+
+        bedrock_model_version = "bedrock-2023-05-31"
+        bedrock_model_id = "anthropic.claude-3-sonnet-20240229-v1:0"
+
+        inference_stack = InferenceStack(
+            self,
+            "inference_stack",
+            env=env,
+            application_ci=application_ci,
+            knowledge_base_id=knowledge_base_stack.knowledge_base_id,
+            bedrock_model_id=bedrock_model_id,
+            bedrock_model_version=bedrock_model_version,
+            knowledge_base_arn=knowledge_base_stack.knowledge_base_arn,
+            contexttable_table_name=context_stack.contexttable_table_name,
+            contexttable_table_arn=context_stack.contexttable_table_arn,
+        )
+
+        bucket_base_name = f"{application_ci}-analytics"
+
+        secondary_bucket = BucketAttributes(
+            bucket_name=f"{bucket_base_name}-us-east-2",
+            region="us-east-2",
+            account=env.account,
+            id="aaa-analytics-secondary",
+        )
+
+        primary_bucket = BucketAttributes(
+            bucket_name=f"{bucket_base_name}-us-east-1",
+            region="us-east-1",
+            account=env.account,
+            id="aaa-analytics-primary",
         )
