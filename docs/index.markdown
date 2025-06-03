@@ -7,9 +7,6 @@ has_children: false
 
 # Applied Agents
 
-[GitHub Repo](https://github.com/The-AI-Alliance/applied-agents){:target="repo" .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 .no-glyph}
-[The AI Alliance](https://thealliance.ai){:target="ai-alliance" .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 .no-glyph} 
-
 | **Authors**     | [FA3: Applications and Tools](https://thealliance.ai/focus-areas/applications-and-tools){:target="ai-alliance-wg"} (See the [Contributors]({{site.baseurl}}/contributing/#contributors)) |
 | **Last Update** | V0.0.1, 2025-04-18 |
 
